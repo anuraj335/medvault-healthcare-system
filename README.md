@@ -1,4 +1,4 @@
-# Healthcare Management System
+# MedVault (Healthcare Management System)
 
 A web application for managing doctor-patient relationships, medical histories, and prescriptions.
 
