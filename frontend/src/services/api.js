@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Set up a base URL for all requests
 const api = axios.create({
-  baseURL: '/api'
+  baseURL: 'http://localhost:3001/api'
 });
 
 // Add a request interceptor to attach the token to all requests

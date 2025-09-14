@@ -34,10 +34,6 @@ const appointmentSchema = new mongoose.Schema({
   },
   notes: {
     type: String
-  },
-  conditionId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Patient.conditionDetails'
   }
 }, { 
   timestamps: true 

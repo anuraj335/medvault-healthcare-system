@@ -38,24 +38,61 @@ const PatientDashboard = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
+        setError('');
         
-        // Fetch all patient data in parallel
-        const [profileData, doctorsData, historyData, prescriptionsData] = await Promise.all([
+        console.log('PatientDashboard: Starting to fetch data...');
+        
+        // Fetch all patient data in parallel with better error handling
+        const results = await Promise.allSettled([
           patientService.getProfile(),
           patientService.getDoctors(),
           patientService.getMedicalHistory(),
           patientService.getPrescriptions()
         ]);
         
-        setProfile(profileData);
-        setDoctors(doctorsData);
-        setMedicalHistory(historyData);
-        setPrescriptions(prescriptionsData);
+        const [profileResult, doctorsResult, historyResult, prescriptionsResult] = results;
+        
+        // Handle each result individually
+        if (profileResult.status === 'fulfilled') {
+          setProfile(profileResult.value);
+          console.log('PatientDashboard: Profile loaded successfully');
+        } else {
+          console.error('PatientDashboard: Failed to load profile:', profileResult.reason);
+        }
+        
+        if (doctorsResult.status === 'fulfilled') {
+          setDoctors(doctorsResult.value);
+          console.log('PatientDashboard: Doctors loaded successfully');
+        } else {
+          console.error('PatientDashboard: Failed to load doctors:', doctorsResult.reason);
+        }
+        
+        if (historyResult.status === 'fulfilled') {
+          setMedicalHistory(historyResult.value);
+          console.log('PatientDashboard: Medical history loaded successfully');
+        } else {
+          console.error('PatientDashboard: Failed to load medical history:', historyResult.reason);
+        }
+        
+        if (prescriptionsResult.status === 'fulfilled') {
+          setPrescriptions(prescriptionsResult.value);
+          console.log('PatientDashboard: Prescriptions loaded successfully');
+        } else {
+          console.error('PatientDashboard: Failed to load prescriptions:', prescriptionsResult.reason);
+        }
+        
+        // Check if any critical data failed to load
+        const failedRequests = results.filter(result => result.status === 'rejected');
+        if (failedRequests.length > 0) {
+          const errorMessages = failedRequests.map(result => result.reason?.message || result.reason?.toString()).join(', ');
+          setError(`Failed to load some dashboard data: ${errorMessages}`);
+        }
+        
         setLoading(false);
       } catch (error) {
-        setError('Failed to load dashboard data');
+        console.error('PatientDashboard: Unexpected error:', error);
+        setError(`Failed to load dashboard data: ${error.message}`);
         setLoading(false);
-        console.error(error);
       }
     };
 

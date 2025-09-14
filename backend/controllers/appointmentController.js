@@ -45,7 +45,7 @@ const isDoctorAvailableOnDay = async (doctorId, date) => {
   const doctor = await Doctor.findById(doctorId);
   if (!doctor) return false;
   
-  const dayOfWeek = new Date(date).toLocaleDateString('en-US', { weekday: 'lowercase' });
+  const dayOfWeek = new Date(date).toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
   return doctor.availability.some(slot => slot.day === dayOfWeek);
 };
 
@@ -85,14 +85,11 @@ exports.getDoctorAppointments = async (req, res) => {
     const appointments = await Appointment.find(filter)
       .populate({
         path: 'patientId',
-        select: 'userId',
+        select: 'userId conditionDetails',
         populate: {
           path: 'userId',
           select: 'name email'
         }
-      })
-      .populate({
-        path: 'conditionId'
       })
       .sort({ date: 1, startTime: 1 });
     
@@ -354,7 +351,7 @@ exports.getDoctorAvailableSlots = async (req, res) => {
     }
     
     // Check if doctor works on this day
-    const dayOfWeek = new Date(date).toLocaleDateString('en-US', { weekday: 'lowercase' });
+    const dayOfWeek = new Date(date).toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
     const availabilityForDay = doctor.availability.find(slot => slot.day === dayOfWeek);
     
     if (!availabilityForDay) {

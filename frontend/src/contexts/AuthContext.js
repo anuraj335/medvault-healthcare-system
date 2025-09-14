@@ -14,18 +14,22 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const checkLoggedIn = async () => {
       try {
+        console.log('AuthContext: Starting auth check...');
         const token = localStorage.getItem('token');
         
         if (!token) {
+          console.log('AuthContext: No token found, setting loading to false');
           setLoading(false);
           return;
         }
 
+        console.log('AuthContext: Token found, checking with backend...');
         // Set auth header
         axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         
         // Fetch user profile
         const response = await axios.get('http://localhost:3001/api/auth/profile');
+        console.log('AuthContext: Profile fetched successfully', response.data);
         setUser(response.data);
         setLoading(false);
       } catch (error) {
@@ -35,7 +39,15 @@ export const AuthProvider = ({ children }) => {
       }
     };
 
-    checkLoggedIn();
+    // Add timeout as fallback to prevent infinite loading
+    const timeoutId = setTimeout(() => {
+      console.log('AuthContext: Timeout reached, setting loading to false');
+      setLoading(false);
+    }, 5000); // 5 second timeout
+
+    checkLoggedIn().finally(() => {
+      clearTimeout(timeoutId);
+    });
   }, []);
 
   // Register user

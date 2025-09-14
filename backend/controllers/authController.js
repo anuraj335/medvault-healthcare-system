@@ -15,11 +15,14 @@ const generateToken = (user) => {
 // Register user
 const register = async (req, res) => {
   try {
+    console.log('Registration attempt:', req.body);
     const { name, email, password, role, specialization } = req.body;
 
     // Check if user already exists
     const userExists = await User.findOne({ email });
+    console.log('User exists check:', userExists ? 'User exists' : 'User does not exist');
     if (userExists) {
+      console.log('Registration failed: User already exists');
       return res.status(400).json({ error: 'User already exists' });
     }
 
@@ -30,6 +33,7 @@ const register = async (req, res) => {
       password,
       role
     });
+    console.log('User created successfully:', user._id);
 
     // Create doctor or patient record based on role
     if (role === 'doctor' && specialization) {
@@ -56,7 +60,9 @@ const register = async (req, res) => {
       role: user.role,
       token
     });
+    console.log('Registration successful for:', email);
   } catch (error) {
+    console.error('Registration error:', error);
     res.status(500).json({ error: error.message });
   }
 };
